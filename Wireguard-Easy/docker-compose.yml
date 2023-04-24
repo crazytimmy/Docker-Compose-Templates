@@ -8,8 +8,8 @@ services:
       - "51820:51820/udp"
       - "51821:51821/tcp"
     environment:
-      - WG_HOST: {{ HOST_DOMAIN }}
-      - PASSWORD: {{ UI_PASSWORD }}
+      - WG_HOST= #Add external IP or DNS hostname (no space after =)
+      - PASSWORD= #Add WebUI password (no space after =)
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -17,3 +17,7 @@ services:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
+
+volumes:
+  wg-easy_data:
+    name: wg-easy_data
