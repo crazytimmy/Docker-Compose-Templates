@@ -1,0 +1,100 @@
+{
+    "version": "1",
+    "templates": [
+        {
+            "title": "Wireguard Easy",
+            "description": "Wireguard VPN with webUI.",
+            "image": "weejewel/wg-easy",
+            "name": "Wireguard Easy",
+            "logo": "https://raw.githubusercontent.com/crazytimmy/Docker-Compose-Templates/master/Portainer-Templates/img/wireguard-logo.png",
+            "env": [
+                {
+                    "name": "WG_HOST",
+                    "label": "Public IP/Domain Name",
+                    "description": "The public IP/hostname of your VPN server."
+                },
+                {
+                    "name": "PASSWORD",
+                    "label": "WebUI password",
+                    "description": "When set, requires a password when logging in to the Web UI."
+                },
+                {
+                    "name": "WG_PORT",
+                    "label": "Port",
+                    "description": "The public UDP port of your VPN server. WireGuard will always listen on 51820 inside the Docker container.",
+                    "default": "51820"
+                },
+                {
+                    "name": "WG_MTU",
+                    "label": "MTU",
+                    "description": "The MTU the clients will use. Server uses default WG MTU."
+                },
+                {
+                    "name": "WG_PERSISTENT_KEEPALIVE",
+                    "label": "Connection Keepalive (seconds)",
+                    "description": "Value in seconds to keep the connection open. If this value is 0, then connections won't be kept alive.",
+                    "default": "0"
+                },
+                {
+                    "name": "WG_DEFAULT_ADDRESS",
+                    "label": "IP address range",
+                    "description": "Clients IP address range.",
+                    "default": "10.8.0.x"
+                },
+                {
+                    "name": "WG_DEFAULT_DNS",
+                    "label": "DNS",
+                    "description": "DNS server clients will use.",
+                    "default": "1.1.1.1"
+                },
+                {
+                    "name": "WG_ALLOWED_IPS",
+                    "label": "Allowed IP's",
+                    "description": "Allowed IP's clients will use.",
+                    "default": "0.0.0.0/0, ::/0"
+                },
+                {
+                    "name": "WG_PRE_UP",
+                    "label": "Pre-Up",
+                    "description": "Optionally run a command before the interface is brought up."
+                },
+                {
+                    "name": "WG_POST_UP",
+                    "label": "Post-Up",
+                    "description": "Optionally run a command after the interface is brought up."
+                },
+
+                {
+                    "name": "WG_PRE_DOWN",
+                    "label": "Pre-Down",
+                    "description": "Optionally run a command before the interface is brought down."
+                },
+
+                {
+                    "name": "WG_POST_DOWN",
+                    "label": "Post-Down",
+                    "description": "Optionally run a command after the interface is brought down."
+                }
+            ],
+            "volumes": [
+                {
+                    "container": "/etc/wireguard"
+                }
+            ],
+            "ports": [
+                "51820:51820/udp",
+                "51821:51821/tcp"
+            ],
+            "restart_policy": "unless-stopped",
+            "platform": "linux",
+            "cap_add": [
+                "NET_ADMIN",
+                "SYS_MODULE"
+            ],
+            "sysctls": [
+                "net.ipv4.ip_forward=1",
+                "net.ipv4.conf.all.src_valid_mark=1"
+            ]
+        }
+    ]
+}
