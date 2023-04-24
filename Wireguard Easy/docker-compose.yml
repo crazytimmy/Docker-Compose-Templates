@@ -8,7 +8,8 @@ services:
       - "51820:51820/udp"
       - "51821:51821/tcp"
     environment:
-      - WG_HOST=jeffsbubble.duckdns.org
+      - WG_HOST: {{ HOST_DOMAIN }}
+      - PASSWORD: {{ UI_PASSWORD }}
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
