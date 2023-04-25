@@ -8,8 +8,8 @@ services:
       - "51820:51820/udp"
       - "51821:51821/tcp"
     environment:
-      - WG_HOST= #Add external IP or DNS hostname (no space after =)
-      - PASSWORD= #Add WebUI password (no space after =)
+      - WG_HOST=${EXTERNAL_DOMAIN} #Add external IP or DNS hostname
+      - PASSWORD=${UI_PASSWORD} #[OPTIONAL] Add WebUI password
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
