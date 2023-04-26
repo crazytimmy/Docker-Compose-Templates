@@ -6,9 +6,10 @@ services:
     volumes:
       - home-assistant_config:/config
       - /etc/localtime:/etc/localtime:ro
+    ports:
+    - "8123:8123/tcp"
     restart: unless-stopped
     privileged: true
-    network_mode: host
 volumes:
   home-assistant_config:
     name: home-assistant_config
