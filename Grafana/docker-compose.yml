@@ -9,6 +9,8 @@ services:
       - grafana_home:/usr/share
     ports:
       - "3000:3000/tcp"
+    environment:
+      - GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app,marcusolsson-ynab-datasource
 volumes:
   grafana_config:
     name: grafana_config
