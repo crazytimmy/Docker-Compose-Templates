@@ -1,0 +1,17 @@
+services:
+  grafana:
+    container_name: grafana
+    restart: unless-stopped
+    image: grafana/grafana-oss
+    volumes:
+      - grafana_config:/etc/grafana
+      - grafana_data:/var/lib/grafana
+      - grafana_home:/usr/share
+    ports: "3000:3000/tcp"
+volumes:
+  grafana_config:
+    name: grafana_config
+  grafana_data:
+    name: grafana_data
+  grafana_home:
+    name: grafana_home
