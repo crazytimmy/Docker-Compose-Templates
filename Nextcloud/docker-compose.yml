@@ -1,0 +1,15 @@
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    volumes:
+      - nextcloud_data:/var/www/html
+      - nextcloud_sqldb:/var/lib/mysql
+    ports:
+      - ":80"
+    restart: unless-stopped
+volumes:
+  nextcloud_data:
+    name: nextcloud_data
+  nextcloud_sqldb:
+    name: nextcloud_sqldb
