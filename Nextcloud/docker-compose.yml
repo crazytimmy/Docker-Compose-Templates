@@ -5,6 +5,11 @@ services:
     volumes:
       - nextcloud_data:/var/www/html
       - nextcloud_sqldb:/var/lib/mysql
+    environment:
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=${DATABASE_NAME}
     ports:
       - ":80"
     restart: unless-stopped
