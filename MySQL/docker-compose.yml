@@ -9,6 +9,15 @@ services:
       - MYSQL_DATABASE=${DATABASE_NAME}
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+    restart: unless-stopped
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - :8080
+    restart: unless-stopped
+
 volumes:
   mysql_data:
     name: mysql_data
