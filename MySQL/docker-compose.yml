@@ -3,7 +3,7 @@ services:
     image: mysql
     container_name: mysql
     volumes:
-      -mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD}
       - MYSQL_DATABASE=${DATABASE_NAME}
