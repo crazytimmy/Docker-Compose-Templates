@@ -16,3 +16,13 @@ Documentation: https://www.home-assistant.io/installation/linux#docker-compose
 Git Repo: https://github.com/grafana/grafana
 
 Documentation: https://grafana.com/docs/grafana/latest/setup-grafana/configure-docker/#configure-a-grafana-docker-image
+
+## Nextcloud
+Git Repo: https://github.com/nextcloud/docker
+
+Documentation: https://github.com/docker-library/docs/blob/master/nextcloud/README.md#running-this-image-with-docker-compose
+
+## MySQL
+Git Repo: https://github.com/docker-library/mysql
+
+Documentation: https://hub.docker.com/_/mysql

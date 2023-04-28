@@ -1,0 +1,14 @@
+services:
+  mysql-db:
+    image: mysql
+    container_name: mysql
+    volumes:
+      -mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DATABASE_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+volumes:
+  mysql_data:
+    name: mysql_data
