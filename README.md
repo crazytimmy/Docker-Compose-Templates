@@ -26,3 +26,10 @@ Documentation: https://github.com/docker-library/docs/blob/master/nextcloud/READ
 Git Repo: https://github.com/docker-library/mysql
 
 Documentation: https://hub.docker.com/_/mysql
+
+## Jellyfin
+Git Repo: https://github.com/jellyfin/jellyfin
+
+Documentation: https://jellyfin.org/docs/general/installation/container
+
+Documentation2: https://docs.linuxserver.io/images/docker-jellyfin#usage
