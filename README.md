@@ -33,3 +33,6 @@ Git Repo: https://github.com/jellyfin/jellyfin
 Documentation: https://jellyfin.org/docs/general/installation/container
 
 Documentation2: https://docs.linuxserver.io/images/docker-jellyfin#usage
+
+## Bind9
+Documentation: https://github.com/ChristianLempa/videos/tree/main/bind9-docker
