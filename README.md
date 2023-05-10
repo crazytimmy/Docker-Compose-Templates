@@ -36,3 +36,5 @@ Documentation2: https://docs.linuxserver.io/images/docker-jellyfin#usage
 
 ## Bind9
 Documentation: https://github.com/ChristianLempa/videos/tree/main/bind9-docker
+
+Documentation2: https://www.digitalocean.com/community/tutorials/how-to-configure-bind-as-a-private-network-dns-server-on-ubuntu-22-04
