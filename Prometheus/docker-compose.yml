@@ -1,0 +1,35 @@
+version: '3.2'
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    environment:
+      - CONFIG_FILE=/etc/prometheus/prometheus.yml
+    volumes:
+      - prometheus_config:/etc/prometheus
+      - prometheus_data:/prometheus
+      - /etc/localtime:/etc/localtime:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+    depends_on:
+    - cadvisor
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+    - 8081:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+
+volumes:
+  prometheus_config:
+    name: prometheus_config
+  prometheus_data:
+    name: prometheus_data
