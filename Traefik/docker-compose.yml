@@ -1,20 +1,63 @@
+version: '3'
+
 services:
-  traefik:
-    image: traefik:1.7.6-alpine
+  reverse-proxy:
+    image: traefik:v2.11
     container_name: traefik
+    environment:
+      - TRAEFIK_PROVIDERS_DOCKER=true
+      - TRAEFIK_API_INSECURE=true
+      - TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT=false
+      - TRAEFIK_ENTRYPOINTS_WEB_ADDRESS=:80
+      - TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS=:443
+      - TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO=websecure
+      - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_DNSCHALLENGE=true
+      - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_DNSCHALLENGE_PROVIDER=duckdns
+      - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_EMAIL=${emailaddress}
+      - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_STORAGE=/letsencrypt/acme.json
+      - DUCKDNS_TOKEN=${duckdnstoken}
+      - TRAEFIK_EXPERIMENTAL_PLUGINS_BOUNCER_MODULENAME=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      - TRAEFIK_EXPERIMENTAL_PLUGINS_BOUNCER_VERSION=v1.2.1-rc1
     ports:
       - 80:80
       - 443:443
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/volumes/traefik_config/_data/traefik.toml:/traefik.toml
-      - /var/lib/docker/volumes/traefik_config/_data/acme.json:/acme.json
+      - 8080:8080
     networks:
-      - web
+      - reverse.proxy-crowdsec
+      - testing-external
+    volumes:
+      - traefik_letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
+    depends_on:
+      - crowdsec
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.6.0-1
+    container_name: crowdsec
+    environment:
+      - COLLECTIONS=crowdsecurity/traefik
+      - CUSTOM_HOSTNAME=crowdsec
+      - BOUNCER_KEY_TRAEFIK=
+    networks:
+      - reverse.proxy-crowdsec
+    volumes:
+      - crowdsec_db:/var/lib/crowdsec/data/
+      - crowdsec_config:/etc/crowdsec/
     labels:
-      - traefik.frontend.rule=Host:monitor.{Domain_Name}
-      - traefik.port=8080
+      - traefik.enable=false
+    restart: unless-stopped
+
+volumes:
+  traefik_letsencrypt:
+    name: traefik_letsencrypt
+  crowdsec_db:
+    name: crowdsec_db
+  crowdsec_config:
+    name: crowdsec_config
+
 networks:
-  web:
-    external: true
+  testing-external:
+    name: testing-external
+  reverse.proxy_crowdsec:
+    name: reverse.proxy_crowdsec

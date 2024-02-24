@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  whoami_test:
+    image: "traefik/whoami"
+    container_name: "simple-service-test"
+    networks:
+      - testing-internal
+      - testing-external
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.test.rule=Host(`test.jeffsbubble.duckdns.org`)"
+      - "traefik.http.routers.test.entrypoints=websecure"
+      - "traefik.http.routers.test.tls.certresolver=duckdns"
+      - "traefik.http.routers.test.middlewares=crowdsec-bar@docker"
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
+
+networks:
+  testing-internal:
+    name: testing-internal
+  testing-external:
+    name: testing-external
