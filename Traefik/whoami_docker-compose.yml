@@ -9,11 +9,13 @@ services:
       - testing-external
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.test.rule=Host(`test.jeffsbubble.duckdns.org`)"
+      - "traefik.http.routers.test.rule=Host(`${domainurlrule}`)"
       - "traefik.http.routers.test.entrypoints=websecure"
       - "traefik.http.routers.test.tls.certresolver=duckdns"
-      - "traefik.http.routers.test.middlewares=crowdsec-bar@docker"
+      - "traefik.http.routers.test.middlewares=crowdsec-test@docker"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
+      #- "traefik.http.middlewares.crowdsec-test.plugin.bouncer.LogLevel=DEBUG"
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.CrowdsecMode=live"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
 
 networks:
