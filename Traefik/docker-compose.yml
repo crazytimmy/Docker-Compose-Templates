@@ -22,6 +22,8 @@ services:
       - DUCKDNS_TOKEN=${duckdnstoken}
       - TRAEFIK_EXPERIMENTAL_PLUGINS_BOUNCER_MODULENAME=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
       - TRAEFIK_EXPERIMENTAL_PLUGINS_BOUNCER_VERSION=v1.2.1-rc1
+      - TRAEFIK_EXPERIMENTAL_PLUGINS_GOOGLEOAUTH_MODULENAME=github.com/andrewkroh/google-oidc-auth-middleware
+      - TRAEFIK_EXPERIMENTAL_PLUGINS_GOOGLEOAUTH_VERSION=v0.0.4
     ports:
       - 80:80
       - 443:443

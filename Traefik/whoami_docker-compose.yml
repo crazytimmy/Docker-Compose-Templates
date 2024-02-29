@@ -12,11 +12,17 @@ services:
       - "traefik.http.routers.test.rule=Host(`${domainurlrule}`)"
       - "traefik.http.routers.test.entrypoints=websecure"
       - "traefik.http.routers.test.tls.certresolver=duckdns"
-      - "traefik.http.routers.test.middlewares=crowdsec-test@docker"
+      - "traefik.http.routers.test.middlewares=crowdsec-test@docker,googleoauth-test@docker"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
       #- "traefik.http.middlewares.crowdsec-test.plugin.bouncer.LogLevel=DEBUG"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.CrowdsecMode=live"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientID=${oauth_clientid}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientsecret=${oauth_clientsecret}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.name=${custom_cookie_name}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.secret=${hmac_key}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.emails=${authorized_emails}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.domains=${authorized_domains}"
 
 networks:
   testing-internal:
