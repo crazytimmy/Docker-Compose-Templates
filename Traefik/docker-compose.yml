@@ -11,6 +11,7 @@ services:
       - TRAEFIK_PROVIDERS_DOCKER=true
       - TRAEFIK_API_INSECURE=true
       - TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT=false
+      - TRAEFIK_PROVIDERS_DOCKER_ENDPOINT=tcp://docker-socket-proxy:2375
       - TRAEFIK_ENTRYPOINTS_WEB_ADDRESS=:80
       - TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS=:443
       - TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO=websecure
@@ -27,14 +28,15 @@ services:
       - 8080:8080
     networks:
       - reverse.proxy-crowdsec
+      - docker-socket-proxy
       - testing-external
     volumes:
       - traefik_logs:/var/log/traefik
       - traefik_letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
     depends_on:
       - crowdsec
+      - docker-socket-proxy
 
   crowdsec:
     image: crowdsecurity/crowdsec:v1.6.0-1
@@ -55,6 +57,48 @@ services:
       - traefik.enable=false
     restart: unless-stopped
 
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:edge
+    container_name: docker-socket-proxy
+    environment:
+      - TZ=America/Winnipeg
+      # Access granted by default:
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      # Access revoked by default:
+      # Security-critical
+      - AUTH=0
+      - SECRETS=0
+      - POST=0
+      # Not always needed
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - CONTAINERS=1 # Traefik
+      - DISTRIBUTION=0
+      - EXEC=0
+      - IMAGES=0
+      - INFO=0
+      - NETWORKS=0
+      - NODES=0
+      - PLUGINS=0
+      - SERVICES=0
+      - SESSION=0
+      - SWARM=0
+      - SYSTEM=0
+      - TASKS=0
+      - VOLUMES=0
+    ports:
+      - 127.0.0.1:2375:2375
+    networks:
+      - docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=false
+    restart: unless-stopped
+
 volumes:
   traefik_logs:
     name: traefik_logs
@@ -68,5 +112,7 @@ volumes:
 networks:
   reverse.proxy-crowdsec:
     name: reverse.proxy-crowdsec
+  docker-socket-proxy:
+    name: docker-socket-proxy
   testing-external:
     name: testing-external
