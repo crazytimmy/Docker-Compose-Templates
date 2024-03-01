@@ -12,7 +12,7 @@ services:
       - "traefik.http.routers.test.rule=Host(`${domainurlrule}`)"
       - "traefik.http.routers.test.entrypoints=websecure"
       - "traefik.http.routers.test.tls.certresolver=duckdns"
-      - "traefik.http.routers.test.middlewares=crowdsec-test@docker,googleoauth-test@docker"
+      - "traefik.http.routers.test.middlewares=crowdsec-test@docker,googleoauth-test@docker,geoblock-test@docker"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
       #- "traefik.http.middlewares.crowdsec-test.plugin.bouncer.LogLevel=DEBUG"
       - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.CrowdsecMode=live"
@@ -23,6 +23,19 @@ services:
       - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.secret=${hmac_key}"
       - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.emails=${authorized_emails}"
       - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.domains=${authorized_domains}"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowLocalRequests=true"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowUnknownCountries=false"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.api=https://get.geojs.io/v1/ip/country/{ip}"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.apiTimeoutMs=150"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.cacheSize=15"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.countries=CA"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.forceMonthlyUpdate=true"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.logAllowedRequests=true"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.logApiRequests=true"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.logLocalRequests=true"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.silentStartUp=false"
+      - "traefik.http.middlewares.geoblock-test.plugin.geoblock.unknownCountryApiResponse=nil"
+      #- "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowedIPAddresses=${IPaddresses}"
 
 networks:
   testing-internal:
