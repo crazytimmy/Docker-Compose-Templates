@@ -9,20 +9,11 @@ services:
       - testing-external
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=${traefik_connected_network}"
       - "traefik.http.routers.test.rule=Host(`${domainurlrule}`)"
       - "traefik.http.routers.test.entrypoints=websecure"
       - "traefik.http.routers.test.tls.certresolver=duckdns"
-      - "traefik.http.routers.test.middlewares=crowdsec-test@docker,googleoauth-test@docker,geoblock-test@docker"
-      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
-      #- "traefik.http.middlewares.crowdsec-test.plugin.bouncer.LogLevel=DEBUG"
-      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.CrowdsecMode=live"
-      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientID=${oauth_clientid}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientsecret=${oauth_clientsecret}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.name=${custom_cookie_name}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.secret=${hmac_key}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.emails=${authorized_emails}"
-      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.domains=${authorized_domains}"
+      - "traefik.http.routers.test.middlewares=geoblock-test@docker,crowdsec-test@docker,googleoauth-test@docker"
       - "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowLocalRequests=true"
       - "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowUnknownCountries=false"
       - "traefik.http.middlewares.geoblock-test.plugin.geoblock.api=https://get.geojs.io/v1/ip/country/{ip}"
@@ -36,7 +27,18 @@ services:
       - "traefik.http.middlewares.geoblock-test.plugin.geoblock.silentStartUp=false"
       - "traefik.http.middlewares.geoblock-test.plugin.geoblock.unknownCountryApiResponse=nil"
       #- "traefik.http.middlewares.geoblock-test.plugin.geoblock.allowedIPAddresses=${IPaddresses}"
-
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.enabled=true"
+      #- "traefik.http.middlewares.crowdsec-test.plugin.bouncer.LogLevel=DEBUG"
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.CrowdsecMode=live"
+      - "traefik.http.middlewares.crowdsec-test.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientID=${oauth_clientid}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.oidc.clientsecret=${oauth_clientsecret}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.name=${custom_cookie_name}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.cookie.secret=${hmac_key}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.emails=${authorized_emails}"
+      - "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.authorized.domains=${authorized_domains}"
+      #- "traefik.http.middlewares.googleoauth-test.plugin.googleoauth.debug=true"
+      
 networks:
   testing-internal:
     name: testing-internal
