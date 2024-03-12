@@ -1,15 +1,55 @@
+version: '3'
+
 services:
-  wg-easy:
-    image: weejewel/wg-easy
-    container_name: wg-easy
+  vpn:
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wireguard
+    environment:
+      - WG_HOST=${EXTERNAL_DOMAIN}
+      - PASSWORD=${UI_PASSWORD}
+      - UI_TRAFFIC_STATS=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${traefik_connected_network}"
+      - "traefik.http.routers.wireguard.rule=Host(`${domainurlrule}`)"
+      - "traefik.http.routers.wireguard.entrypoints=websecure"
+      - "traefik.http.routers.wireguard.tls.certresolver=duckdns"
+      - "traefik.http.routers.wireguard.middlewares=geoblock-wireguard@docker,crowdsec-wireguard@docker,googleoauth-wireguard@docker"
+      - "traefik.http.routers.wireguard.service=wireguard-ui"
+      - "traefik.http.services.wireguard-ui.loadbalancer.server.port=51821"
+      - "traefik.udp.routers.wireguard.entrypoints=vpn"
+      - "traefik.udp.routers.wireguard.service=wireguard"
+      - "traefik.udp.services.wireguard.loadbalancer.server.port=51820"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.allowLocalRequests=false"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.allowUnknownCountries=false"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.api=https://get.geojs.io/v1/ip/country/{ip}"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.apiTimeoutMs=150"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.cacheSize=15"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.countries=CA"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.forceMonthlyUpdate=true"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.logAllowedRequests=true"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.logApiRequests=true"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.logLocalRequests=true"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.silentStartUp=false"
+      - "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.unknownCountryApiResponse=nil"
+      #- "traefik.http.middlewares.geoblock-wireguard.plugin.geoblock.allowedIPAddresses=${IPaddresses}"
+      - "traefik.http.middlewares.crowdsec-wireguard.plugin.bouncer.enabled=true"
+      #- "traefik.http.middlewares.crowdsec-wireguard.plugin.bouncer.LogLevel=DEBUG"
+      - "traefik.http.middlewares.crowdsec-wireguard.plugin.bouncer.CrowdsecMode=live"
+      - "traefik.http.middlewares.crowdsec-wireguard.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.oidc.clientID=${oauth_clientid}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.oidc.clientsecret=${oauth_clientsecret}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.cookie.name=${custom_cookie_name}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.cookie.secret=${hmac_key}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.authorized.emails=${authorized_emails}"
+      - "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.authorized.domains=${authorized_domains}"
+      #- "traefik.http.middlewares.googleoauth-wireguard.plugin.googleoauth.debug=true"
+    ports:
+      - "51821:51821/tcp"
+    networks:
+      - reverse.proxy-wireguard
     volumes:
       - wg-easy_data:/etc/wireguard
-    ports:
-      - "51820:51820/udp"
-      - "51821:51821/tcp"
-    environment:
-      - WG_HOST=${EXTERNAL_DOMAIN} #Add external IP or DNS hostname
-      - PASSWORD=${UI_PASSWORD} #[OPTIONAL] Add WebUI password
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -21,3 +61,7 @@ services:
 volumes:
   wg-easy_data:
     name: wg-easy_data
+
+networks:
+  reverse.proxy-wireguard:
+    name: reverse.proxy-wireguard
