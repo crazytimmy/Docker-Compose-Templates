@@ -5,7 +5,7 @@ services:
     image: traefik:v2.11
     container_name: traefik
     environment:
-      - TZ=America/Winnipeg
+      - TZ=America/${location}
       - TRAEFIK_ACCESSLOG=true
       - TRAEFIK_ACCESSLOG_FILEPATH=/var/log/traefik/access.log
       #- TRAEFIK_LOG_LEVEL=DEBUG
@@ -17,6 +17,7 @@ services:
       - TRAEFIK_ENTRYPOINTS_WEB_ADDRESS=:80
       - TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS=:443
       - TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO=websecure
+      - TRAEFIK_ENTRYPOINTS_VPN_ADDRESS=:51820/udp
       - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_DNSCHALLENGE=true
       - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_DNSCHALLENGE_DISABLEPROPAGATIONCHECK=true #Not recommended. Helped resolve certificate not getting created issue.
       - TRAEFIK_CERTIFICATESRESOLVERS_DUCKDNS_ACME_DNSCHALLENGE_PROVIDER=duckdns
@@ -33,9 +34,12 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 51820:51820/udp
       - 8080:8080
     networks:
       - reverse.proxy-crowdsec
+      - reverse.proxy-homeassistant
+      - reverse.proxy-wireguard
       - docker-socket-proxy
       - testing-external
     volumes:
@@ -50,7 +54,7 @@ services:
     image: crowdsecurity/crowdsec:v1.6.0-1
     container_name: crowdsec
     environment:
-      - TZ=America/Winnipeg
+      - TZ=America/${location}
       - COLLECTIONS=crowdsecurity/traefik
       - CUSTOM_HOSTNAME=crowdsec
       - BOUNCER_KEY_TRAEFIK=${crowdseclapikey}
@@ -69,7 +73,7 @@ services:
     image: tecnativa/docker-socket-proxy:edge
     container_name: docker-socket-proxy
     environment:
-      - TZ=America/Winnipeg
+      - TZ=America/${location}
       # Access granted by default:
       - EVENTS=1
       - PING=1
@@ -120,6 +124,10 @@ volumes:
 networks:
   reverse.proxy-crowdsec:
     name: reverse.proxy-crowdsec
+  reverse.proxy-homeassistant:
+    name: reverse.proxy-homeassistant
+  reverse.proxy-wireguard:
+    name: reverse.proxy-wireguard
   docker-socket-proxy:
     name: docker-socket-proxy
   testing-external:
