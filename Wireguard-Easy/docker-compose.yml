@@ -8,6 +8,8 @@ services:
       - WG_HOST=${EXTERNAL_DOMAIN}
       - PASSWORD=${UI_PASSWORD}
       - UI_TRAFFIC_STATS=true
+      - WG_POST_UP=iptables -I FORWARD -i wg0 -d 192.168.XX.0/24,172.XX.0.0/16 -j REJECT; iptables -I FORWARD -i wg0 -s 10.8.0.X -d 192.168.XX.0/24 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+      - WG_POST_DOWN=iptables -I FORWARD -D wg0 -d 192.168.XX.0/24,172.XX.0.0/16 -j REJECT; iptables -I FORWARD -D wg0 -s 10.8.0.X -d 192.168.XX.0/24 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${traefik_connected_network}"
