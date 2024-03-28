@@ -41,6 +41,7 @@ services:
     networks:
       - reverse.proxy-homeassistant
       - home.assistant-zwave
+      - home.assistant-mdns.reflector
     volumes:
       - home-assistant_config:/config
     restart: unless-stopped
@@ -66,6 +67,16 @@ services:
     devices:
       - '/dev/serial/by-id/usb-Zooz_800_Z-Wave_Stick_533D004242-if00:/dev/zwave'
 
+  mdns-reflector:
+    image: flungo/avahi
+    container_name: mdns-reflector
+    environment:
+      - REFLECTOR_ENABLE_REFLECTOR=yes
+    networks:
+      - physical-macvlan
+      - home.assistant-mdns.reflector
+    restart: unless-stopped
+
 volumes:
   home-assistant_config:
     name: home-assistant_config
@@ -77,3 +88,11 @@ networks:
     name: reverse.proxy-homeassistant
   home.assistant-zwave:
     name: home.assistant-zwave
+  home.assistant-mdns.reflector:
+    name: home.assistant-mdns.reflector
+  physical-macvlan:
+    #Must create this network manually with CLI:
+    #Change IP structure to match the LAN it's connecting to (same as dockers physical LAN). Also change parent=eno1 to docker hosts physical adapter in the command below:
+    #docker network create -d macvlan --subnet=192.168.X.0/24 --ip-range=192.168.X.8/29 --gateway=192.168.X.1 -o parent=eno1 physical-macvlan
+    name: physical-macvlan
+    external: true
