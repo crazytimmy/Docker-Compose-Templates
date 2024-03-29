@@ -42,11 +42,14 @@ services:
       - reverse.proxy-homeassistant
       - home.assistant-zwave
       - home.assistant-mdns.reflector
+      - home.assistant-mosquitto
     volumes:
       - home-assistant_config:/config
     restart: unless-stopped
     depends_on:
       - zwave-js-ui
+      - mdns-reflector
+      - mosquitto
 
   zwave-js-ui:
     image: zwavejs/zwave-js-ui:latest
@@ -77,11 +80,30 @@ services:
       - home.assistant-mdns.reflector
     restart: unless-stopped
 
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0.18
+    container_name: mosquitto
+    ports:
+      - "127.0.0.1:1883:1883" #listener
+    networks:
+      - home.assistant-mosquitto
+    volumes:
+      - mosquitto_config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    restart: unless-stopped
+
 volumes:
   home-assistant_config:
     name: home-assistant_config
   zwave_config:
     name: zwave_config
+  mosquitto_config:
+    name: mosquitto_config
+  mosquitto_data:
+    name: mosquitto_data
+  mosquitto_log:
+    name: mosquitto_log
 
 networks:
   reverse.proxy-homeassistant:
@@ -96,3 +118,5 @@ networks:
     #docker network create -d macvlan --subnet=192.168.X.0/24 --ip-range=192.168.X.8/29 --gateway=192.168.X.1 -o parent=eno1 physical-macvlan
     name: physical-macvlan
     external: true
+  home.assistant-mosquitto:
+    name: home.assistant-mosquitto
