@@ -56,7 +56,7 @@ services:
     container_name: zwave-js-ui
     environment:
       - ZWAVEJS_EXTERNAL_CONFIG=/usr/src/app/store/.config-db
-      - TZ=America/Winnipeg
+      - TZ=America/${location}
     ports:
       - '8091:8091' # port for web interface
       - '127.0.0.1:3000:3000' # port for Z-Wave JS websocket server
@@ -87,10 +87,28 @@ services:
       - "127.0.0.1:1883:1883" #listener
     networks:
       - home.assistant-mosquitto
+      - mosquitto-govee.mqtt
     volumes:
       - mosquitto_config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
+    restart: unless-stopped
+
+  govee-mqtt:
+    image: ghcr.io/wez/govee2mqtt:latest
+    container_name: govee-mqtt
+    environment:
+      - GOVEE_EMAIL=
+      - GOVEE_PASSWORD=
+      - GOVEE_API_KEY=
+      - GOVEE_MQTT_HOST=
+      - GOVEE_MQTT_PORT=1883
+      - GOVEE_TEMPERATURE_SCALE=C
+      - RUST_LOG_STYLE=always
+      #- RUST_LOG=govee=trace
+      - TZ=America/${location}
+    networks:
+      - mosquitto-govee.mqtt
     restart: unless-stopped
 
 volumes:
@@ -120,3 +138,5 @@ networks:
     external: true
   home.assistant-mosquitto:
     name: home.assistant-mosquitto
+  mosquitto-govee.mqtt:
+    name: mosquitto-govee.mqtt
