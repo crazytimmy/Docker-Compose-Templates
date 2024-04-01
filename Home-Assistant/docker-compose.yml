@@ -49,7 +49,7 @@ services:
     depends_on:
       - zwave-js-ui
       - mdns-reflector
-      - mosquitto
+      - mqtt-broker
 
   zwave-js-ui:
     image: zwavejs/zwave-js-ui:latest
@@ -116,6 +116,7 @@ services:
     labels:
       - traefik.enable=false
     networks:
+      - physical-macvlan
       - mosquitto-govee.mqtt
     restart: unless-stopped
 
