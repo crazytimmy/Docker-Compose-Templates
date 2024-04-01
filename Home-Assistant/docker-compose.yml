@@ -57,6 +57,8 @@ services:
     environment:
       - ZWAVEJS_EXTERNAL_CONFIG=/usr/src/app/store/.config-db
       - TZ=America/${location}
+    labels:
+      - traefik.enable=false
     ports:
       - '8091:8091' # port for web interface
       - '127.0.0.1:3000:3000' # port for Z-Wave JS websocket server
@@ -75,6 +77,8 @@ services:
     container_name: mdns-reflector
     environment:
       - REFLECTOR_ENABLE_REFLECTOR=yes
+    labels:
+      - traefik.enable=false
     networks:
       - physical-macvlan
       - home.assistant-mdns.reflector
@@ -83,6 +87,8 @@ services:
   mqtt-broker:
     image: eclipse-mosquitto:2.0.18
     container_name: mosquitto
+    labels:
+      - traefik.enable=false
     ports:
       - "127.0.0.1:1883:1883" #listener
     networks:
@@ -107,6 +113,8 @@ services:
       - RUST_LOG_STYLE=always
       #- RUST_LOG=govee=trace
       - TZ=America/${location}
+    labels:
+      - traefik.enable=false
     networks:
       - mosquitto-govee.mqtt
     restart: unless-stopped
