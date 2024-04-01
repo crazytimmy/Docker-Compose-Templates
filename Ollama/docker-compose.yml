@@ -1,0 +1,31 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    environment:
+      - TZ=America/${location}
+    labels:
+      - traefik.enable=false
+    ports:
+      - 11434:11434
+    volumes:
+      - ollama_data:/root/.ollama
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    environment:
+      - TZ=America/${location}
+      - OLLAMA_BASE_URL=http://ollama:11434
+    labels:
+      - traefik.enable=false
+    ports:
+      - :8080
+    volumes:
+      - open-webui_data:/app/backend/data
+
+volumes:
+  ollama_data:
+    name: ollama_data
+  open-webui_data:
+    name: open-webui_data
