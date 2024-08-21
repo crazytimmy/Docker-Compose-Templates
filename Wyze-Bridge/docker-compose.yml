@@ -1,18 +1,44 @@
-version: '2.4'
 services:
-    wyze-bridge:
-        container_name: wyze-bridge
-        restart: unless-stopped
-        image: mrlt8/wyze-bridge:latest
-        ports:
-            - 1935:1935 # RTMP
-            - 8554:8554 # RTSP
-            - 8888:8888 # HLS
-            - 8889:8889 #WebRTC
-            - 8189:8189/udp # WebRTC/ICE
-            - 5000:5000 # WEB-UI
-        environment:
-            - WYZE_EMAIL=${WYZE_EMAIL}
-            - WYZE_PASSWORD=${WYZE_PASSWORD}
-            - WB_IP=${WB_IP}
-            - ROTATE_DOOR=True
+  wyze-bridge:
+    image: mrlt8/wyze-bridge:latest
+    container_name: wyze-bridge
+    environment:
+      - FILTER_NAMES=Front door, Driveway Cam 1, Driveway Cam 2
+      #- ROTATE_DOOR=True #<-Letting Frigate rotate with GPU acceleration
+      - WB_AUTH=False
+      - NET_MODE=LAN
+    labels:
+      - "traefik.enable=false"
+    ports:
+      #- 1935:1935 # RTMP
+      #- 8554:8554 # RTSP
+      #- 8888:8888 # HLS
+      #- 8889:8889 #WebRTC
+      #- 8189:8189/udp # WebRTC/ICE
+      - 5000:5000 # WEB-UI
+    networks:
+      - wyze.bridge-frigate
+      - home.assistant-wyze.bridge
+    secrets:
+      - WYZE_EMAIL
+      - WYZE_PASSWORD
+      - API_ID
+      - API_KEY
+    restart: unless-stopped
+
+
+networks:
+  wyze.bridge-frigate:
+    name: wyze.bridge-frigate
+  home.assistant-wyze.bridge:
+    name: home.assistant-wyze.bridge
+
+secrets:
+  WYZE_EMAIL:
+    file: /home/<username>/secrets/wyze_email.txt
+  WYZE_PASSWORD:
+    file: /home/<username>/secrets/wyze_password.txt
+  API_ID:
+    file: /home/<username>/secrets/wyze_api_id.txt
+  API_KEY:
+    file: /home/<username>/secrets/wyze_api_key.txt
