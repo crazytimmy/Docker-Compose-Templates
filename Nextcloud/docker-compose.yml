@@ -2,19 +2,85 @@ services:
   nextcloud:
     image: nextcloud
     container_name: nextcloud
-    volumes:
-      - nextcloud_data:/var/www/html
-      - nextcloud_sqldb:/var/lib/mysql
     environment:
+      - TZ=America/${location}
+      - MYSQL_DATABASE=${DATABASE_NAME}
+      - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_USER_PASSWORD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_HOST=${DATABASE_NAME}
+      - MYSQL_HOST=maria-db
+      #- NEXTCLOUD_ADMIN_USER=ncadmin
+      #- NEXTCLOUD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      #- NEXTCLOUD_DATA_DIR=/var/www/html/data
+      #- NEXTCLOUD_TRUSTED_DOMAINS=
+    labels:
+      - "traefik.enable=true"
+      #- "traefik.docker.network=${traefik_connected_network}"
+      - "traefik.http.routers.nextcloud.rule=Host(`${domainurlrule}`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls.certresolver=duckdns"
+      - "traefik.http.routers.nextcloud.middlewares=geoblock-nextcloud@docker,crowdsec-nextcloud@docker,googleoauth-nextcloud@docker"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.allowLocalRequests=true"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.allowUnknownCountries=false"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.api=https://get.geojs.io/v1/ip/country/{ip}"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.apiTimeoutMs=150"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.cacheSize=15"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.countries=CA"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.forceMonthlyUpdate=true"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.logAllowedRequests=true"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.logApiRequests=true"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.logLocalRequests=true"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.silentStartUp=false"
+      - "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.unknownCountryApiResponse=nil"
+      #- "traefik.http.middlewares.geoblock-nextcloud.plugin.geoblock.allowedIPAddresses=${IPaddresses}"
+      - "traefik.http.middlewares.crowdsec-nextcloud.plugin.bouncer.enabled=true"
+      #- "traefik.http.middlewares.crowdsec-nextcloud.plugin.bouncer.LogLevel=DEBUG"
+      - "traefik.http.middlewares.crowdsec-nextcloud.plugin.bouncer.CrowdsecMode=live"
+      - "traefik.http.middlewares.crowdsec-nextcloud.plugin.bouncer.crowdseclapikey=${crowdseclapikey}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.oidc.clientID=${oauth_clientid}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.oidc.clientsecret=${oauth_clientsecret}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.cookie.name=${custom_cookie_name}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.cookie.secret=${hmac_key}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.authorized.emails=${authorized_emails}"
+      - "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.authorized.domains=${authorized_domains}"
+      #- "traefik.http.middlewares.googleoauth-nextcloud.plugin.googleoauth.debug=true"
     ports:
       - ":80"
+    networks:
+      - reverse.proxy-nextcloud
+      - nextcloud-mariadb
+    links:
+      - maria-db
+    volumes:
+      - nextcloud_data:/var/www/html
     restart: unless-stopped
+    depends_on:
+      - maria-db
+
+  maria-db:
+    image: mariadb:latest
+    container_name: nextcloud-mariadb
+    environment:
+      - TZ=America/${location}
+      - MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DATABASE_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - nextcloud-mariadb
+    volumes:
+      - nextcloud_mariadb:/var/lib/mysql
+    restart: unless-stopped
+
 volumes:
   nextcloud_data:
     name: nextcloud_data
-  nextcloud_sqldb:
-    name: nextcloud_sqldb
+  nextcloud_mariadb:
+    name: nextcloud_mariadb
+
+networks:
+  reverse.proxy-nextcloud:
+    name: reverse.proxy-nextcloud
+  nextcloud-mariadb:
+    name: nextcloud-mariadb
