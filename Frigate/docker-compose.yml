@@ -22,7 +22,8 @@ services:
     restart: unless-stopped
     shm_size: "64mb"
     devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/apex_0:/dev/apex_0 #PCIe Coral TPU
+      - /dev/dri/renderD128:/dev/dri/renderD128 #Intel hwaccel integrated GPU
 
 volumes:
   frigate_config:
